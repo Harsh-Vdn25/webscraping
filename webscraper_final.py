@@ -46,8 +46,13 @@ def scrape_pest_info(urls):
         page = browser.new_page()
 
         for url in urls:
-            page.goto(url)
-            page.wait_for_timeout(3000)  # wait 3 seconds
+            try:
+                page.goto(url, timeout=60000, wait_until="networkidle")  # 60s timeout
+            except Exception as e:
+                print(f"Failed to load {url}: {e}")
+                results.append({"url": url, "title": None, "image_src": None})
+                continue
+
             soup = BeautifulSoup(page.content(), "html.parser")
 
             # Extract header
@@ -69,6 +74,10 @@ def scrape_pest_info(urls):
         browser.close()
 
     return results
+
+
+
+
 
 data = scrape_pest_info(links)
 
